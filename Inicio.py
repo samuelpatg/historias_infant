@@ -7,10 +7,10 @@ from PIL import Image, ImageOps
 import numpy as np
 import pandas as pd
 from streamlit_drawable_canvas import st_canvas
-
+ 
 Expert=" "
 profile_imgenh=" "
-
+ 
 # Inicializar session_state
 if 'analysis_done' not in st.session_state:
     st.session_state.analysis_done = False
@@ -26,22 +26,22 @@ def encode_image_to_base64(image_path):
             return encoded_image
     except FileNotFoundError:
         return "Error: La imagen no se encontró en la ruta especificada."
-
-
+ 
+ 
 # Streamlit 
-st.set_page_config(page_title='Tablero Inteligente')
-st.title('Tablero Inteligente')
+st.set_page_config(page_title='Tablero del Terror')
+st.title('🕯️ Tablero del Terror')
 with st.sidebar:
     st.subheader("Acerca de:")
-    st.subheader("En esta aplicación veremos la capacidad que ahora tiene una máquina de interpretar un boceto")
+    st.subheader("En esta aplicación veremos la capacidad que ahora tiene una máquina de interpretar un boceto y convertirlo en una historia de terror")
 st.subheader("Dibuja el boceto en el panel y presiona el botón para analizarla")
-
+ 
 # Add canvas component
 drawing_mode = "freedraw"
 stroke_width = st.sidebar.slider('Selecciona el ancho de línea', 1, 30, 5)
 stroke_color = "#000000" 
 bg_color = '#FFFFFF'
-
+ 
 # Create a canvas component
 canvas_result = st_canvas(
     fill_color="rgba(255, 165, 0, 0.3)",
@@ -53,21 +53,21 @@ canvas_result = st_canvas(
     drawing_mode=drawing_mode,
     key="canvas",
 )
-
+ 
 ke = st.text_input('Ingresa tu Clave', type="password")
 os.environ['OPENAI_API_KEY'] = ke
-
+ 
 # Retrieve the OpenAI API Key
 api_key = os.environ['OPENAI_API_KEY']
-
+ 
 # Initialize the OpenAI client with the API key
 client = OpenAI(api_key=api_key)
-
+ 
 analyze_button = st.button("Analiza la imagen", type="secondary")
-
+ 
 # Check if an image has been uploaded, if the API key is available, and if the button has been pressed
 if canvas_result.image_data is not None and api_key and analyze_button:
-
+ 
     with st.spinner("Analizando ..."):
         # Encode the image
         input_numpy_array = np.array(canvas_result.image_data)
@@ -119,25 +119,30 @@ if canvas_result.image_data is not None and api_key and analyze_button:
     
         except Exception as e:
             st.error(f"An error occurred: {e}")
-
+ 
 # Mostrar la funcionalidad de crear historia si ya se hizo el análisis
 if st.session_state.analysis_done:
     st.divider()
-    st.subheader("📚 ¿Quieres crear una historia?")
+    st.subheader("🦇 ¿Te atreves a crear una historia de terror?")
     
-    if st.button("✨ Crear historia infantil"):
-        with st.spinner("Creando historia..."):
-            story_prompt = f"Basándote en esta descripción: '{st.session_state.full_response}', crea una historia infantil breve y entretenida. La historia debe ser creativa y apropiada para niños."
+    if st.button("💀 Crear historia de terror"):
+        with st.spinner("Invocando la historia..."):
+            story_prompt = (
+                f"Basándote en esta descripción: '{st.session_state.full_response}', "
+                "escribe en español una historia de terror breve y escalofriante. "
+                "Debe tener una atmósfera oscura, suspenso creciente y un final inquietante."
+            )
             
             story_response = openai.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": story_prompt}],
-                max_tokens=500,
+                max_tokens=700,
             )
             
-            st.markdown("**📖 Tu historia:**")
+            st.markdown("**👻 Tu historia de terror:**")
             st.write(story_response.choices[0].message.content)
-
+ 
 # Warnings for user action required
 if not api_key:
     st.warning("Por favor ingresa tu API key.")
+ 
